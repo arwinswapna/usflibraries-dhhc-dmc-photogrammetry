@@ -3,6 +3,8 @@ from time import sleep
 from datetime import datetime
 from sh import gphoto2 as gp
 import signal, os, subprocess
+from gpiozero import Button
+from signal import pause
 
 # Kill the gphoto process that starts
 # whenever we turn on the camera or
@@ -43,7 +45,7 @@ def captureImages():
     out, err = p.communicate()
 
     for line in out.splitlines():
-        if b'usb' in line:  
+        if b'usb:001' in line:  
             portName = (line.split(None,1)[0])
             print(portName)
             portName = portName.decode('utf-8')
@@ -71,8 +73,18 @@ def renameFiles(ID):
                 print("Renamed the CR2")
 
 
-killGphoto2Process()
-gp(clearCommand)
-createSaveFolder()
-captureImages()
-renameFiles(picID)
+
+
+def cameraButtonTrigger():
+    print("Program Triggered")
+    killGphoto2Process()
+    gp(clearCommand)
+    createSaveFolder()
+    captureImages()
+    renameFiles(picID)
+
+button = Button(2)
+
+button.when_pressed = cameraButtonTrigger
+
+pause()
