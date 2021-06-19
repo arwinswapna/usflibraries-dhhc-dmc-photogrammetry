@@ -1,4 +1,3 @@
-
 from time import sleep
 from datetime import datetime
 from sh import gphoto2 as gp
@@ -55,12 +54,12 @@ def captureImages():
             triggerCommand = [triggerPort, "--trigger-capture"]
             print(triggerCommand)
             gp(triggerCommand)
-            sleep(1)
-            downloadCommand = [triggerPort ,"--get-all-files"]
-            gp(downloadCommand)
-            clearCommand = [triggerPort ,"--folder", "/store_00020001/DCIM/100CANON", \
-                "--delete-all-files", "-R"]
-            gp(clearCommand)
+            # sleep(1)
+            # downloadCommand = [triggerPort ,"--get-all-files"]
+            # gp(downloadCommand)
+            # clearCommand = [triggerPort ,"--folder", "/store_00020001/DCIM/100CANON", \
+            #     "--delete-all-files", "-R"]
+            # gp(clearCommand)
 
 def renameFiles(ID):
     for filename in os.listdir("."):
@@ -74,17 +73,46 @@ def renameFiles(ID):
 
 
 
+def imageDownload():
+    p = subprocess.Popen(['gphoto2', '--list-ports'], stdout=subprocess.PIPE)
+    print(p)
+    ou, er = p.communicate()
+
+    for line in ou.splitlines():
+        if b'usb:001' in line:
+            print(portName)
+            portName = portName.decode('utf-8')
+            print(portName)
+            triggerPort = "--port=" + portName
+            print(triggerPort)
+            downloadCommand = [triggerPort ,"--get-all-files"]
+            gp(downloadCommand)
+            clearCommand = [triggerPort ,"--folder", "/store_00020001/DCIM/100CANON", \
+                "--delete-all-files", "-R"]
+            #gp(clearCommand)
+            
+    
+
 
 def cameraButtonTrigger():
-    print("Program Triggered")
+    print("Capture Program Triggered")
     killGphoto2Process()
-    gp(clearCommand)
-    createSaveFolder()
+    # createSaveFolder()
     captureImages()
+    # renameFiles(picID)
+
+def cameraDownloadButtonTrigger():
+    print("Download Program Triggered")
+    #gp(clearCommand)
+    createSaveFolder()
+    imageDownload()
     renameFiles(picID)
 
-button = Button(2)
 
-button.when_pressed = cameraButtonTrigger
+button1 = Button(5)
+button2 = Button(2)
+
+button1.when_pressed = cameraButtonTrigger
+button2.when_pressed = cameraDownloadButtonTrigger
 
 pause()
